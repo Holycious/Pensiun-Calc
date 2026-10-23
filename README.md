@@ -35,20 +35,3 @@ Asumsi: setoran di akhir bulan, return dan inflasi tetap, dana ditarik 4% per ta
 index.html                     # seluruh aplikasi (HTML + CSS + JS, tanpa dependensi)
 Kalkulator Dana Pensiun.html   # redirect ke index.html
 ```
-
-## Menjalankan lokal
-
-Buka `index.html` langsung di browser, atau:
-
-```bash
-python3 -m http.server 8000
-# lalu buka http://localhost:8000
-```
-
-## Deploy
-
-Hosting statis apa pun bisa dipakai. Repo ini memakai GitHub Pages:
-
-1. Settings → Pages → Source: **Deploy from a branch**
-2. Branch: `main`, folder `/ (root)`
-3. Simpan; situs aktif di `https://<username>.github.io/<repo>/`
