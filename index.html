@@ -331,9 +331,15 @@ table.proj-table tr:last-child td{border-bottom:0}
         <div class="row-2col">
           <div class="field">
             <label for="age">Umur Sekarang</label>
-            <div class="input-box with-suffix">
-              <input id="age" class="input-elem" type="number" value="30" min="1" max="100">
-              <span class="input-suffix">th</span>
+            <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:6px">
+              <div class="input-box with-suffix">
+                <input id="age" class="input-elem" type="number" value="30" min="1" max="100">
+                <span class="input-suffix">th</span>
+              </div>
+              <div class="input-box with-suffix">
+                <input id="ageM" class="input-elem" type="number" value="0" min="0" max="11" placeholder="0">
+                <span class="input-suffix">bln</span>
+              </div>
             </div>
           </div>
           <div class="field">
@@ -429,6 +435,7 @@ bindCurrencyInput($("init"), $("initDesc"));
 
 function calc() {
   const age = parseInt($("age").value, 10) || 0;
+  const ageM = Math.min(11, Math.max(0, parseInt($("ageM").value, 10) || 0));
   const tage = parseInt($("tage").value, 10) || 0;
   const need = parseCurrency($("need").value);
   const init = parseCurrency($("init").value);
@@ -440,7 +447,8 @@ function calc() {
     out.innerHTML = '<div class="alert-box">Umur harus berupa angka positif.</div>';
     return;
   }
-  if (tage <= age) {
+  const m = (tage - age) * 12 - ageM;
+  if (m <= 0) {
     out.innerHTML = '<div class="alert-box">Umur target pensiun harus lebih besar dari umur saat ini.</div>';
     return;
   }
@@ -449,12 +457,11 @@ function calc() {
     return;
   }
 
-  const yrs = tage - age;
-  const m = yrs * 12;
+  const yrsDecimal = m / 12;
   const i = r / 12;
 
   // Formula finansial
-  const futNeed = need * Math.pow(1 + f, yrs);
+  const futNeed = need * Math.pow(1 + f, yrsDecimal);
   const target = futNeed * 12 * 25;
   const initFV = i === 0 ? init : init * Math.pow(1 + i, m);
   const gap = Math.max(0, target - initFV);
@@ -467,24 +474,42 @@ function calc() {
   const persenSetor = Math.min(100, Math.round((totalSetoran / target) * 100)) || 0;
   const persenBunga = Math.max(0, 100 - persenSetor);
 
-  // Tabel proyeksi per tahun
+  // Tabel proyeksi per tahun (memperhitungkan sisa bulan berjalan)
   let rows = "";
   let bal = init;
-  for (let y = 1; y <= yrs; y++) {
+  let totalSetorRun = init;
+  const firstMonths = Math.min(ageM > 0 ? (12 - ageM) : 12, m);
+
+  // Periode tahun pertama
+  for (let k = 0; k < firstMonths; k++) {
+    bal = (bal * (1 + i)) + pmt;
+    totalSetorRun += pmt;
+  }
+  const labelTahunPertama = ageM > 0 
+    ? `${age + 1} th <span style="font-size:.74rem;color:var(--tx-muted);font-weight:400">(${firstMonths} bln)</span>`
+    : `${age + 1} th`;
+
+  rows += `<tr>
+    <td>${labelTahunPertama}</td>
+    <td>${rp(totalSetorRun)}</td>
+    <td class="saldo">${rp(bal)}</td>
+  </tr>`;
+
+  // Tahun-tahun berikutnya hingga umur target pensiun
+  for (let y = age + 2; y <= tage; y++) {
     for (let k = 0; k < 12; k++) {
       bal = (bal * (1 + i)) + pmt;
+      totalSetorRun += pmt;
     }
-    const totalSetorY = init + (pmt * 12 * y);
     rows += `<tr>
-      <td>${age + y} th</td>
-      <td>${rp(totalSetorY)}</td>
+      <td>${y} th</td>
+      <td>${rp(totalSetorRun)}</td>
       <td class="saldo">${rp(bal)}</td>
     </tr>`;
   }
-
   // Update URL hash
   const params = new URLSearchParams({
-    age, tage, need, init, rate: $("rate").value, inf: $("inf").value
+    age, ageM, tage, need, init, rate: $("rate").value, inf: $("inf").value
   });
   window.history.replaceState(null, "", `#${params.toString()}`);
 
@@ -498,7 +523,7 @@ function calc() {
       <div class="hero-sub">
         ${isSudahCukup 
           ? `Dana awal Anda berkembang mandiri melampaui target tanpa perlu setoran tambahan.`
-          : `Disisihkan setiap akhir bulan selama ${yrs} tahun (${m} bulan).`}
+          : `Disisihkan setiap akhir bulan selama ${Math.floor(m / 12)} tahun ${m % 12 > 0 ? (m % 12) + ' bulan ' : ''}(${m} bulan).`}
       </div>
       <div class="hero-footer">
         <div class="hero-foot-col">
@@ -586,6 +611,7 @@ document.querySelectorAll(".btn-preset").forEach(btn => {
   btn.addEventListener("click", () => {
     const [age, tage, need, init, rate, inf] = btn.dataset.p.split(",");
     $("age").value = age;
+    $("ageM").value = 0;
     $("tage").value = tage;
     $("need").value = fmt(need);
     $("init").value = fmt(init);
@@ -597,7 +623,7 @@ document.querySelectorAll(".btn-preset").forEach(btn => {
   });
 });
 
-["age", "tage", "rate", "inf"].forEach(id => {
+["age", "ageM", "tage", "rate", "inf"].forEach(id => {
   $(id).addEventListener("input", calc);
 });
 
@@ -635,6 +661,7 @@ if (window.location.hash.length > 1) {
   try {
     const p = new URLSearchParams(window.location.hash.slice(1));
     if (p.has("age")) $("age").value = p.get("age");
+    if (p.has("ageM")) $("ageM").value = p.get("ageM");
     if (p.has("tage")) $("tage").value = p.get("tage");
     if (p.has("need")) $("need").value = fmt(parseInt(p.get("need"), 10) || 10000000);
     if (p.has("init")) $("init").value = fmt(parseInt(p.get("init"), 10) || 50000000);
