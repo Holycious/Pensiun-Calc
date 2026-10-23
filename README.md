@@ -1,6 +1,8 @@
 # Kalkulator Dana Pensiun
 
-Kalkulator dana pensiun berbasis **Aturan 4% (Trinity Study)**, inflasi, dan bunga majemuk. Menghitung setoran bulanan yang dibutuhkan untuk mencapai target dana pensiun.
+![Preview aplikasi Kalkulator Dana Pensiun](preview.png)
+
+Kalkulator dana pensiun, inflasi, dan bunga majemuk. Menghitung setoran bulanan yang dibutuhkan untuk mencapai target dana pensiun.
 
 **Akses web:** https://holycious.github.io/Pensiun-Calc/
 
@@ -50,7 +52,3 @@ Hosting statis apa pun bisa dipakai. Repo ini memakai GitHub Pages:
 1. Settings → Pages → Source: **Deploy from a branch**
 2. Branch: `main`, folder `/ (root)`
 3. Simpan; situs aktif di `https://<username>.github.io/<repo>/`
-
-## Lisensi
-
-MIT
