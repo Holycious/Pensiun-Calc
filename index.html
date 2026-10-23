@@ -86,12 +86,13 @@ body{
 }
 .app-layout{
   display:grid;
-  grid-template-columns:410px 1fr;
+  grid-template-columns:410px minmax(0,1fr);
   gap:32px;
   align-items:start;
 }
+.app-layout > *{min-width:0}
 @media (max-width:960px){
-  .app-layout{grid-template-columns:1fr;gap:24px}
+  .app-layout{grid-template-columns:minmax(0,1fr);gap:24px}
   body{padding:20px 14px 48px}
 }
 
@@ -277,8 +278,8 @@ input.input-elem{
   font-size:.82rem;color:var(--tx-muted);font-weight:500;
 }
 .table-scroll{
-  max-height:280px;overflow-y:auto;border-radius:var(--radius-md);
-  border:1px solid var(--table-border);
+  max-height:280px;overflow-y:auto;overflow-x:auto;
+  border-radius:var(--radius-md);border:1px solid var(--table-border);
 }
 table.proj-table{
   width:100%;border-collapse:collapse;font-size:.85rem;white-space:nowrap;
@@ -298,6 +299,10 @@ table.proj-table td{
 table.proj-table td:first-child{text-align:left;color:var(--tx-muted)}
 table.proj-table td.saldo{color:var(--emerald-val);font-weight:700}
 table.proj-table tr:last-child td{border-bottom:0}
+@media (max-width:560px){
+  table.proj-table{font-size:.78rem}
+  table.proj-table th,table.proj-table td{padding:8px 9px}
+}
 
 .disclaimer{
   font-size:.8rem;color:var(--tx-muted);line-height:1.5;margin-top:2px;
