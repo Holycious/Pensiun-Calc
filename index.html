@@ -514,6 +514,10 @@ function calc() {
   window.history.replaceState(null, "", `#${params.toString()}`);
 
   const isSudahCukup = gap === 0;
+  const durasiTh = Math.floor(m / 12), durasiBl = m % 12;
+  const durasiTeks = durasiTh
+    ? `${durasiTh} tahun${durasiBl ? ` ${durasiBl} bulan` : ""} (${m} bulan)`
+    : `${m} bulan`;
 
   out.innerHTML = `
     <!-- HERO CARD -->
@@ -523,7 +527,7 @@ function calc() {
       <div class="hero-sub">
         ${isSudahCukup 
           ? `Dana awal Anda berkembang mandiri melampaui target tanpa perlu setoran tambahan.`
-          : `Disisihkan setiap akhir bulan selama ${Math.floor(m / 12)} tahun ${m % 12 > 0 ? (m % 12) + ' bulan ' : ''}(${m} bulan).`}
+          : `Disisihkan setiap akhir bulan selama ${durasiTeks}.`}
       </div>
       <div class="hero-footer">
         <div class="hero-foot-col">
